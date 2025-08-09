@@ -276,3 +276,73 @@ Preparare docker-compose per avviare tutto insieme
 Se vuoi, posso aggiungere a questo **README** anche il **diagramma dell’architettura microservizi** così è più visivo.  
 Vuoi che lo faccio?
 
+
+    
+## 🖐️ Safe Area & Gesture Handler nel Root Layout
+
+Per garantire un corretto comportamento delle gesture (swipe, transizioni, drawer) e la gestione sicura dello spazio sugli schermi con notch o status bar, il `RootLayout` è stato modificato per includere due wrapper fondamentali:
+
+### 1. `GestureHandlerRootView`
+- **Scopo:** necessario per far funzionare correttamente tutte le gesture di `react-native-gesture-handler` e `@react-navigation`.
+- **Posizionamento:** deve avvolgere l'intera applicazione (livello più alto possibile).
+
+### 2. `SafeAreaProvider`
+- **Scopo:** evita che i contenuti vengano nascosti dalla status bar o dal notch su iOS e Android.
+- **Posizionamento:** subito sotto il `GestureHandlerRootView`.
+
+### Implementazione in `app/_layout.tsx`
+```tsx
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Stack } from 'expo-router';
+import { ThemeProvider, DarkTheme, DefaultTheme } from '@react-navigation/native';
+import { useColorScheme } from '@/components/useColorScheme';
+
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          </Stack>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+
+⚠️ Nota: assicurati di avere installato react-native-gesture-handler:
+
+bash
+Copia
+Modifica
+
+
+npx expo install react-native-gesture-handler
+
+
+Con questa configurazione:
+
+Le gesture funzioneranno senza bug.
+
+I contenuti saranno sempre visibili in aree sicure (safe area).
+
+La struttura è pronta per supportare navigation e transizioni complesse.
+
+
+---
+
+Se vuoi, Javid, posso anche **aggiungere uno screenshot della struttura finale delle cartelle** al README così chiunque apra il progetto capisce subito dove sta `_layout.tsx` e `(tabs)/_layout.tsx`.  
+Vuoi che lo faccia?
+
+
+---
+
+Se vuoi, Javid, posso anche **aggiungere uno screenshot della struttura finale delle cartelle** al README così chiunque apra il progetto capisce subito dove sta `_layout.tsx` e `(tabs)/_layout.tsx`.  
+Vuoi che lo faccia?
+
