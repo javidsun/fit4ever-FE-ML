@@ -1,60 +1,54 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+// app/_layout.tsx
+import "react-native-gesture-handler";
+import "react-native-reanimated";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import { Slot, useRouter, useSegments, useRootNavigationState } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useColorScheme } from "@/components/useColorScheme";
+import { AuthProvider, useAuth } from "@/src/context/AuthContext";
 
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+SplashScreen.preventAutoHideAsync().catch(() => {});
+const AUTH_ENTRY = "/(app)"; // se usi (tabs), metti "/(tabs)"
 
-import { useColorScheme } from '@/components/useColorScheme';
-
-export { ErrorBoundary } from 'expo-router';
-
-export const unstable_settings = {
-  initialRouteName: '(tabs)',
-};
-
-// Evita che la splash sparisca prima di caricare i font/assets
-SplashScreen.preventAutoHideAsync();
-
-export default function RootLayout() {
-  const [loaded, error] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-    ...FontAwesome.font,
-  });
+function RouteGuard() {
+  const seg = useSegments();
+  const navReady = !!useRootNavigationState()?.key;
+  const router = useRouter();
+  const { user, ready } = useAuth();
 
   useEffect(() => {
-    if (error) throw error;
-  }, [error]);
+    if (!ready || !navReady) return;
+    const top = seg[0]; // "(auth)" | "(app)" | "(tabs)"
+    if (user && top === "(auth)") router.replace(AUTH_ENTRY);
+    if (!user && top !== "(auth)") router.replace("/(auth)/login");
+  }, [seg, navReady, user, ready]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
+  return <Slot />;
 }
 
-function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
+  const [loaded] = useFonts({
+    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
+    ...FontAwesome.font,
+  });
+  useEffect(() => { if (loaded) SplashScreen.hideAsync().catch(() => {}); }, [loaded]);
+  if (!loaded) return null;
+
+  const theme = useColorScheme() === "dark" ? DarkTheme : DefaultTheme;
 
   return (
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
-            </Stack>
-          </ThemeProvider>
+          <AuthProvider>
+            <ThemeProvider value={theme}>
+              <RouteGuard />
+            </ThemeProvider>
+          </AuthProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
   );
