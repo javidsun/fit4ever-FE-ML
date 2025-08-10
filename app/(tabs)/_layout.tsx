@@ -43,12 +43,13 @@ export default function TabLayout() {
                 }}
             />
             <Tabs.Screen
-                name="two"
+                name="exercises/index"
                 options={{
-                    title: 'javid page',
-                    tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+                    title: 'Esercizi',
+                    tabBarIcon: ({ color }) => <TabBarIcon name="heartbeat" color={color} />, // o 'dumbbell' se usi altra icon set
                 }}
             />
+
         </Tabs>
     );
 }

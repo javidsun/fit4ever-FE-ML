@@ -346,3 +346,7 @@ Vuoi che lo faccia?
 Se vuoi, Javid, posso anche **aggiungere uno screenshot della struttura finale delle cartelle** al README così chiunque apra il progetto capisce subito dove sta `_layout.tsx` e `(tabs)/_layout.tsx`.  
 Vuoi che lo faccia?
 
+
+installazione dipendenza per il gif 
+
+npx expo install expo-image
